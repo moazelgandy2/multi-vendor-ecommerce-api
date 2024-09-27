@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { AppError } from "./utils/AppError";
 import { catchError } from "./utils/catchError";
 
-import authRouter from "./routes/auth";
+import authRouter from "./routes/auth.route";
 
 dotenv.config();
 
