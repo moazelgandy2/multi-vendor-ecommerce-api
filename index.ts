@@ -7,6 +7,7 @@ import { catchError } from "./utils/catchError";
 import authRouter from "./routes/auth.routes";
 import productsRouter from "./routes/products.routes";
 import categoriesRouter from "./routes/categories.routes";
+import reviewsRouter from "./routes/reviews.routes";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ const PORT = process.env.PORT || 3000;
 app.use("/auth", authRouter);
 app.use("/products", productsRouter);
 app.use("/categories", categoriesRouter);
+app.use("/reviews", reviewsRouter);
 
 app.use("*", (req: Request, res: Response, next: NextFunction) => {
   return next(new AppError("Route not found", 404));
