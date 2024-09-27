@@ -30,9 +30,13 @@ export const signUp = async (
       },
     });
 
-    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      { id: newUser.id, role: newUser.role },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: "1d",
+      }
+    );
 
     res
       .status(201)
@@ -58,9 +62,13 @@ export const signIn = async (
 
     if (!isPasswordValid) return next(new AppError("Invalid credentials", 400));
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: "1d",
+      }
+    );
 
     res.status(200).json(new AppSuccess("Login successful.", { token }));
   } catch (error) {

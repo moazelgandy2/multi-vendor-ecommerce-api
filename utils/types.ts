@@ -8,6 +8,7 @@ export type ErrorObject = {
 
 export type JWTDecoded = {
   id: string;
+  role: string;
   iat: number;
   exp: number;
 };
