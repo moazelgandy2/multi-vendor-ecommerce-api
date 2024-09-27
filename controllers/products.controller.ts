@@ -68,6 +68,9 @@ export const getProduct = async (
   try {
     const { id } = req.params;
 
+    const validObjectId = typeof id === "string" && id.length === 24;
+    if (!validObjectId) return next(new AppError("Invalid product id", 400));
+
     if (!id) return next(new AppError("Product ID is required", 400));
 
     let product = await db.product.findUnique({
@@ -121,6 +124,23 @@ export const createProduct = async (
   try {
     const { name, price, categoryId, description, stock } = req.body;
 
+    const isAdmin = await db.user.findUnique({
+      where: {
+        id: req.user.id,
+        role: { in: ["ADMIN", "SELLER"] },
+      },
+    });
+
+    if (!isAdmin) {
+      return next(
+        new AppError("You don't have permission to update this product", 403)
+      );
+    }
+
+    const validObjectId =
+      typeof categoryId === "string" && categoryId.length === 24;
+    if (!validObjectId) return next(new AppError("Invalid category id", 400));
+
     const validCategory = await db.category.findFirst({
       where: {
         id: categoryId,
@@ -157,6 +177,10 @@ export const updateProduct = async (
     const { id } = req.params;
     const { name, price, categoryId, description, stock } = req.body;
 
+    const validObjectId =
+      typeof categoryId === "string" && categoryId.length === 24;
+    if (!validObjectId) return next(new AppError("Invalid category id", 400));
+
     const product = await db.product.findUnique({
       where: {
         id,
@@ -165,10 +189,14 @@ export const updateProduct = async (
 
     if (!product) return next(new AppError("Product not found", 404));
 
-    if (
-      product.sellerId !== req.user.id &&
-      req.user.role.toLowerCase() !== "admin"
-    ) {
+    const isAdmin = await db.user.findUnique({
+      where: {
+        id: req.user.id,
+        role: "ADMIN",
+      },
+    });
+
+    if (product.sellerId !== req.user.id && !isAdmin) {
       return next(
         new AppError("You don't have permission to update this product", 403)
       );
@@ -210,6 +238,9 @@ export const deleteProduct = async (
   try {
     const { id } = req.params;
 
+    const validObjectId = typeof id === "string" && id.length === 24;
+    if (!validObjectId) return next(new AppError("Invalid product id", 400));
+
     const product = await db.product.findUnique({
       where: {
         id,
@@ -218,12 +249,16 @@ export const deleteProduct = async (
 
     if (!product) return next(new AppError("Product not found", 404));
 
-    if (
-      product.sellerId !== req.user.id &&
-      req.user.role.toLowerCase() !== "admin"
-    ) {
+    const isAdmin = await db.user.findUnique({
+      where: {
+        id: req.user.id,
+        role: "ADMIN",
+      },
+    });
+
+    if (product.sellerId !== req.user.id && !isAdmin) {
       return next(
-        new AppError("You don't have permission to delete this product", 403)
+        new AppError("You don't have permission to update this product", 403)
       );
     }
 
