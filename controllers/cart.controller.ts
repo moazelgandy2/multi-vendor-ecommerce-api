@@ -3,6 +3,7 @@ import { JWTDecoded } from "../utils/types";
 import { AppError } from "../utils/AppError";
 import { db } from "../database/db";
 import { AppSuccess } from "../utils/AppSuccess";
+import { createNewCart, handleExistingCart } from "../utils/cart-functions";
 
 export const getUserCart = async (
   req: Request extends { user: JWTDecoded } ? Request : any,
@@ -40,119 +41,27 @@ export const addProductToCart = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
+    const { id: productId } = req.params;
+    const { id: userId } = req.user;
 
-    const cart = await db.cart.findFirst({
-      where: {
-        userId: req.user.id,
-      },
-    });
-    const product = await db.product.findFirst({
-      where: {
-        id,
-      },
-    });
+    const [cart, product] = await Promise.all([
+      db.cart.findFirst({ where: { userId } }),
+      db.product.findFirst({ where: { id: productId } }),
+    ]);
 
-    if (!product) return next(new AppError("Product not found", 404));
+    console.log("cart", "product");
+
+    if (!product) {
+      return next(new AppError("Product not found", 404));
+    }
 
     if (cart) {
-      const productInCart = await db.cartItem.findFirst({
-        where: {
-          cartId: cart.id,
-          productId: id,
-        },
-      });
-
-      if (productInCart) {
-        if (productInCart.quantity + 1 > product.stock) {
-          return next(new AppError("Product out of stock", 409));
-        }
-        await db.cartItem.update({
-          where: {
-            id: productInCart.id,
-          },
-          data: {
-            quantity: productInCart.quantity + 1,
-            amount: productInCart.amount + product.price,
-          },
-        });
-        await db.cart.update({
-          where: {
-            id: cart.id,
-          },
-          data: {
-            total: cart.total + product.price,
-          },
-        });
-      } else {
-        await db.cartItem.create({
-          data: {
-            cartId: cart.id,
-            productId: id,
-            quantity: 1,
-            amount: product.price,
-          },
-        });
-        await db.cart.update({
-          where: {
-            id: cart.id,
-          },
-          data: {
-            total: cart.total + product.price,
-          },
-        });
-      }
-
-      const cartData = await db.cart.findFirst({
-        where: {
-          userId: req.user.id,
-        },
-        include: {
-          cartItems: {
-            include: {
-              product: true,
-            },
-          },
-        },
-      });
-
-      res
-        .status(201)
-        .json(new AppSuccess("Product added to cart first", cartData));
+      await handleExistingCart(cart, product, userId, res, next);
     } else {
-      const newCart = await db.cart.create({
-        data: {
-          userId: req.user.id,
-          total: product.price,
-        },
-      });
-
-      const cartItem = await db.cartItem.create({
-        data: {
-          cartId: newCart.id,
-          productId: product.id,
-          quantity: 1,
-          amount: product.price,
-        },
-      });
-
-      const cartData = await db.cart.findFirst({
-        where: {
-          userId: req.user.id,
-        },
-        include: {
-          cartItems: {
-            include: {
-              product: true,
-            },
-          },
-        },
-      });
-
-      res.status(201).json(new AppSuccess("Product added to cart", cartData));
+      await createNewCart(userId, product, res);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return next(new AppError("Internal server error", 500));
   }
 };
@@ -215,92 +124,26 @@ export const updateUserCart = async (
     const { id } = req.params;
     const { quantity } = req.body;
 
-    const cart = await db.cart.findFirst({
-      where: {
-        userId: req.user.id,
-      },
-    });
+    const [cart, product] = await Promise.all([
+      db.cart.findFirst({
+        where: {
+          userId: req.user.id,
+        },
+      }),
+      db.product.findFirst({
+        where: {
+          id,
+        },
+      }),
+    ]);
 
     if (!cart) {
       return next(new AppError("No cart found for the user.", 404));
     }
 
-    const product = await db.product.findFirst({
-      where: {
-        id,
-      },
-    });
-
     if (!product) return next(new AppError("Product not found", 404));
 
-    if (quantity >= product.stock) {
-      return next(new AppError("Product out of stock", 409));
-    }
-
-    const productInCart = await db.cartItem.findFirst({
-      where: {
-        cartId: cart.id,
-        productId: id,
-      },
-    });
-
-    if (!productInCart) {
-      await db.cartItem.create({
-        data: {
-          cartId: cart.id,
-          productId: id,
-          quantity,
-          amount: quantity * product.price,
-        },
-        include: {
-          product: true,
-        },
-      });
-    } else {
-      await db.cartItem.update({
-        where: {
-          id: productInCart.id,
-        },
-        data: {
-          quantity,
-          amount: quantity * product.price,
-        },
-      });
-    }
-
-    const itemsData = await db.cartItem.findMany({
-      where: {
-        cartId: cart.id,
-      },
-    });
-
-    const totalPrice = itemsData.reduce((acc, item) => {
-      return acc + item.amount;
-    }, 0);
-
-    await db.cart.update({
-      where: {
-        id: cart.id,
-      },
-      data: {
-        total: totalPrice,
-      },
-    });
-
-    const cartData = await db.cart.findFirst({
-      where: {
-        userId: req.user.id,
-      },
-      include: {
-        cartItems: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
-
-    res.status(200).json(new AppSuccess("Cart updated successfully", cartData));
+    await handleExistingCart(cart, product, req.user.id, res, next, quantity);
   } catch (error) {
     console.log(error);
     return next(new AppError("Internal server error", 500));

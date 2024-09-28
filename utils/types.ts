@@ -12,3 +12,9 @@ export type JWTDecoded = {
   iat: number;
   exp: number;
 };
+
+export type Coupon = {
+  code: string;
+  discount: number;
+  expiryInDays: number;
+};
