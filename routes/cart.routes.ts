@@ -10,7 +10,7 @@ import {
 
 const cartRouter = Router();
 
-cartRouter.get("/", authMiddleware, getUserCart);
+cartRouter.get("/me", authMiddleware, getUserCart);
 cartRouter.post("/product/:id", authMiddleware, addProductToCart);
 cartRouter.delete("/:id", authMiddleware, deleteCart);
 cartRouter.put("/product/:id", authMiddleware, updateUserCart);

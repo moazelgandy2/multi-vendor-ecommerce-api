@@ -32,8 +32,9 @@ model User {
   cart     Cart[]
   orders   Order[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  WishList  WishList[]
 }
 
 model Category {
@@ -61,12 +62,14 @@ model Product {
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String   @db.ObjectId
 
-  reviews Review[]
-  Order   Order[]
+  reviews  Review[]
+  Order    Order[]
+  CartItem CartItem[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  CartItem  CartItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  WishList WishList[]
 }
 
 model Review {
@@ -110,6 +113,19 @@ model CartItem {
 
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String  @db.ObjectId
+}
+
+model WishList {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Order {

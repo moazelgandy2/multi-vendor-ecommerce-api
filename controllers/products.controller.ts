@@ -149,6 +149,8 @@ export const createProduct = async (
 
     if (!validCategory) return next(new AppError("Invalid category.", 404));
 
+    // TODO: Upload image to firebase
+
     const product = await db.product.create({
       data: {
         name,
@@ -175,7 +177,7 @@ export const updateProduct = async (
 ) => {
   try {
     const { id } = req.params;
-    const { name, price, categoryId, description, stock } = req.body;
+    const { name, price, categoryId, description, stock, image } = req.body;
 
     const validObjectId =
       typeof categoryId === "string" && categoryId.length === 24;
@@ -210,6 +212,8 @@ export const updateProduct = async (
 
     if (!validCategory) return next(new AppError("Invalid category.", 404));
 
+    // TODO: Upload image to firebase
+
     const updatedProduct = await db.product.update({
       where: {
         id,
@@ -220,6 +224,7 @@ export const updateProduct = async (
         categoryId,
         description,
         stock,
+        image,
       },
     });
 
