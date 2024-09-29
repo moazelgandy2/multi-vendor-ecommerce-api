@@ -43,3 +43,8 @@ export const ChangePasswordSchema = z.object({
 export const resetPasswordSchema = z.object({
   email: z.string().email(),
 });
+
+export const verifyOTPSchema = z.object({
+  otp: z.number().min(6),
+  email: z.string().email(),
+});

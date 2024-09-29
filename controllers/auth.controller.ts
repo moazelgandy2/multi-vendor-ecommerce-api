@@ -6,6 +6,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { User } from "@prisma/client";
 import { JWTDecoded } from "../utils/types";
+import { redis } from "../database/redis";
+import { sendMail } from "../utils/send-mail";
 
 export const signUp = async (
   req: Request,
@@ -220,13 +222,73 @@ export const resetPassword = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { email } = req.body;
-  if (!email) return next(new AppError("Email is required", 400));
+  try {
+    const { email } = req.body;
+    if (!email) return next(new AppError("Email is required", 400));
 
-  const user = await db.user.findFirst({ where: { email } });
+    const user = await db.user.findFirst({ where: { email } });
 
-  if (!user) return next(new AppError("User not found", 404));
+    if (!user) return next(new AppError("User not found", 404));
 
-  // TODO: Generate OTP, save it in redis and send it to the user email
-  // TODO: Make a route to verify the OTP and reset the password
+    const OTP = Math.floor(100000 + Math.random() * 900000);
+
+    const hashKey = `reset-password:user-${user.id}`;
+
+    await redis.hset(hashKey, "otp", OTP.toString());
+
+    await sendMail(OTP, email);
+
+    res.status(200).json(new AppSuccess("OTP sent to your email.", { email }));
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("An error occurred", 500));
+  }
+};
+
+export const verifyOTP = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp)
+      return next(new AppError("Email and OTP are required", 400));
+
+    const user = await db.user.findFirst({ where: { email } });
+
+    if (!user) return next(new AppError("User not found", 404));
+
+    const hashKey = `reset-password:user-${user.id}`;
+
+    const OTP = await redis.hget(hashKey, "otp");
+
+    if (otp != OTP) return next(new AppError("Invalid OTP", 400));
+
+    const randomTempPassword = Math.random().toString(36).slice(-8);
+
+    const hashPassword = bcrypt.hashSync(randomTempPassword, 10);
+
+    await db.user.update({
+      where: { email },
+      data: {
+        password: hashPassword,
+      },
+    });
+
+    await redis.del(hashKey);
+
+    res.status(200).json(
+      new AppSuccess(
+        "Password reset successfully.Please note that this is a temporary password. Please change it after login.",
+        {
+          password: randomTempPassword,
+        }
+      )
+    );
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("An error occurred", 500));
+  }
 };

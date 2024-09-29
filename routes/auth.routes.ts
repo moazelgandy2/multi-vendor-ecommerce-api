@@ -3,17 +3,21 @@ import { Router } from "express";
 import {
   changePassword,
   me,
+  resetPassword,
   signIn,
   signUp,
   updateProfile,
+  verifyOTP,
 } from "../controllers/auth.controller";
 
 import { validateData } from "../validations/validate";
 import {
   ChangePasswordSchema,
+  resetPasswordSchema,
   SignInSchema,
   SignUpSchema,
   UpdateProfileSchema,
+  verifyOTPSchema,
 } from "../validations/schemas/auth.schema";
 import authMiddleware from "../middleware/auth.middleware";
 
@@ -33,10 +37,18 @@ authRouter.put(
 );
 
 authRouter.put(
-  "/me/password",
+  "/password/change",
   authMiddleware,
   validateData(ChangePasswordSchema),
   changePassword
 );
+
+authRouter.post(
+  "/password/forget",
+  validateData(resetPasswordSchema),
+  resetPassword
+);
+
+authRouter.post("/otp/verify", validateData(verifyOTPSchema), verifyOTP);
 
 export default authRouter;
