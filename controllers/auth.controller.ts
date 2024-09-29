@@ -13,7 +13,7 @@ export const signUp = async (
   next: NextFunction
 ) => {
   try {
-    const { username, email, phone, password } = req.body;
+    const { username, email, phone, password, address } = req.body;
 
     const existUser = await db.user.findFirst({
       where: { OR: [{ phone }, { email }] },
@@ -30,8 +30,20 @@ export const signUp = async (
       },
     });
 
+    const newAddress = await db.address.createMany({
+      data: address.map((item: any) => ({
+        ...item,
+        userId: newUser.id,
+      })),
+    });
+
     const token = jwt.sign(
-      { id: newUser.id, role: newUser.role },
+      {
+        id: newUser.id,
+        role: newUser.role,
+        email: newUser.email,
+        phone: newUser.phone,
+      },
       process.env.JWT_SECRET!,
       {
         expiresIn: "1d",
@@ -42,6 +54,11 @@ export const signUp = async (
       .status(201)
       .json(new AppSuccess("You have successfully signed up.", { token }));
   } catch (error) {
+    try {
+      await db.user.delete({ where: { email: req.body.email } });
+    } catch (e) {
+      console.log(e);
+    }
     console.log(error);
     return next(new AppError("An error occurred", 500));
   }
@@ -63,7 +80,7 @@ export const signIn = async (
     if (!isPasswordValid) return next(new AppError("Invalid credentials", 400));
 
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { id: user.id, role: user.role, email: user.email, phone: user.phone },
       process.env.JWT_SECRET!,
       {
         expiresIn: "1d",

@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/AppError";
 import jwt from "jsonwebtoken";
-import { JWTDecoded } from "../utils/types";
+import { AuthenticatedRequest } from "../utils/types";
 
 export default function authMiddleware(
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) {

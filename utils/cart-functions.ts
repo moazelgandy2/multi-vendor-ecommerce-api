@@ -129,3 +129,12 @@ async function getCartData(userId: string): Promise<Cart | null> {
     },
   });
 }
+
+export async function deleteCart(cartId: string) {
+  const [cart, cartItems] = await Promise.all([
+    db.cart.delete({ where: { id: cartId } }),
+    db.cartItem.deleteMany({ where: { cartId } }),
+  ]);
+
+  return { cart, cartItems };
+}

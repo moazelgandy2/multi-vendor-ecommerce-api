@@ -1,3 +1,5 @@
+import { Request } from "express";
+
 export type ErrorObject = {
   success: boolean;
   message: string;
@@ -6,9 +8,15 @@ export type ErrorObject = {
   info?: any;
 };
 
+export interface AuthenticatedRequest extends Request {
+  user?: JWTDecoded;
+}
+
 export type JWTDecoded = {
   id: string;
   role: string;
+  email: string;
+  phone: string;
   iat: number;
   exp: number;
 };

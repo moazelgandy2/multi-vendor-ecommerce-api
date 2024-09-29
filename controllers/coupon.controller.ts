@@ -17,15 +17,17 @@ export const applyCoupon = async (
 
     const couponData = await redis.hgetall(couponKey);
 
+    console.log(couponData);
+
+    if (Object.keys(couponData).length === 0) {
+      return next(new AppError("Invalid coupon", 400));
+    }
+
     const coupon: Coupon = {
       code: couponData.code,
       discount: parseInt(couponData.discount),
       expiryInDays: parseInt(couponData.expiryInDays, 10),
     };
-
-    if (!coupon) {
-      return next(new AppError("Invalid coupon", 400));
-    }
 
     const user = await db.user.findFirst({
       where: {

@@ -19,22 +19,39 @@ enum Role {
   USER
 }
 
+model Address {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  street    String
+  city      String
+  state     String
+  zip       String
+  isDefault Boolean @default(false)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   username String
   email    String @unique
   phone    String @unique
   password String
-  role     Role   @default(USER)
+
+  role Role @default(USER)
 
   products Product[]
   reviews  Review[]
   cart     Cart[]
   orders   Order[]
+  WishList WishList[]
+  Address  Address[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  WishList  WishList[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Category {
@@ -63,13 +80,13 @@ model Product {
   categoryId String   @db.ObjectId
 
   reviews  Review[]
-  Order    Order[]
   CartItem CartItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  WishList WishList[]
+  WishList   WishList[]
+  orderItems OrderItems[]
 }
 
 model Review {
@@ -128,16 +145,52 @@ model WishList {
   updatedAt DateTime @updatedAt
 }
 
+enum DeliveryOrderStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  DELIVERED
+}
+
+enum paymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum PaymentType {
+  COD
+  CARD
+}
+
 model Order {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  status String
-  total  Float
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  total Float
+
+  status paymentStatus @default(PENDING)
+
+  paymentType PaymentType
+  delivery    DeliveryOrderStatus @default(PENDING)
 
   user   User   @relation(fields: [userId], references: [id])
   userId String @db.ObjectId
 
+  orderItems OrderItems[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItems {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId String @db.ObjectId
+
   product   Product @relation(fields: [productId], references: [id])
   productId String  @db.ObjectId
+
+  quantity Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
