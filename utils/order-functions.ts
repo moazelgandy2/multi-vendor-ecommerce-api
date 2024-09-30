@@ -1,15 +1,16 @@
 import { Cart, CartItem, paymentStatus } from "@prisma/client";
 import { db } from "../database/db";
 
-export const createCashOrder = async (
+export const createPaymentOrder = async (
   userId: string,
+  paymentType: "COD" | "CARD",
   cart: Cart & { cartItems: CartItem[] }
 ) => {
   const order = await db.order.create({
     data: {
       userId,
       total: cart.total,
-      paymentType: "COD",
+      paymentType,
     },
   });
   await createOrderItems(order.id, cart.cartItems);

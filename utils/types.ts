@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { FileFilterCallback } from "multer";
 
 export type ErrorObject = {
   success: boolean;
@@ -26,3 +27,9 @@ export type Coupon = {
   discount: number;
   expiryInDays: number;
 };
+
+export type FileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  callback: FileFilterCallback
+) => void;

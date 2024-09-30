@@ -5,7 +5,11 @@ import { AppError } from "../utils/AppError";
 export function validateData(schema: z.ZodObject<any, any>) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      schema.parse(req.body);
+      const data = { ...req.body, image: req.file?.buffer };
+      console.log(req.file);
+
+      schema.parse(data);
+
       next();
     } catch (error) {
       if (error instanceof ZodError) {

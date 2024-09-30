@@ -4,7 +4,7 @@ import { AppError } from "../utils/AppError";
 import { db } from "../database/db";
 import { deleteCart } from "../utils/cart-functions";
 import { AppSuccess } from "../utils/AppSuccess";
-import { createCashOrder, getOrders } from "../utils/order-functions";
+import { createPaymentOrder, getOrders } from "../utils/order-functions";
 
 export const createOrder = async (
   req: Request extends { user: JWTDecoded } ? Request : any,
@@ -33,7 +33,7 @@ export const createOrder = async (
       return next(new AppError("User has no carts.", 404));
     }
 
-    const order = payment == "COD" && (await createCashOrder(user.id, cart));
+    const order = await createPaymentOrder(user.id, payment, cart);
 
     await deleteCart(cart.id);
 

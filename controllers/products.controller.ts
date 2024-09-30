@@ -3,6 +3,13 @@ import { db } from "../database/db";
 import { AppSuccess } from "../utils/AppSuccess";
 import { AppError } from "../utils/AppError";
 import { JWTDecoded } from "../utils/types";
+import {
+  getDownloadURL,
+  ref,
+  uploadBytes,
+  uploadString,
+} from "firebase/storage";
+import { storage } from "../utils/firebase";
 
 export const getProducts = async (
   req: Request,
@@ -149,19 +156,37 @@ export const createProduct = async (
 
     if (!validCategory) return next(new AppError("Invalid category.", 404));
 
-    // TODO: Upload image to firebase
+    let product;
+    try {
+      const file = req.file;
+      if (!file) {
+        return next(new AppError("Image file is required", 400));
+      }
 
-    const product = await db.product.create({
-      data: {
-        name,
-        price,
-        categoryId,
-        description,
-        sellerId: req.user.id,
-        stock,
-        image: "https://via.placeholder.com/150",
-      },
-    });
+      const fileExtension = file.originalname.split(".").pop();
+      const fileRef = ref(
+        storage,
+        `images/${req.user.id}/${name}.${fileExtension}`
+      );
+      await uploadString(fileRef, file.buffer.toString("base64"), "base64");
+
+      const imageUrl = await getDownloadURL(fileRef);
+
+      product = await db.product.create({
+        data: {
+          name,
+          price: +price,
+          categoryId,
+          description,
+          sellerId: req.user.id,
+          stock: +stock,
+          image: imageUrl,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      next(new AppError("Internal server error", 500));
+    }
 
     res.status(201).json(new AppSuccess("Product created", product));
   } catch (err) {
@@ -177,12 +202,13 @@ export const updateProduct = async (
 ) => {
   try {
     const { id } = req.params;
-    const { name, price, categoryId, description, stock, image } = req.body;
-
-    const validObjectId =
-      typeof categoryId === "string" && categoryId.length === 24;
-    if (!validObjectId) return next(new AppError("Invalid category id", 400));
-
+    const { name, price, categoryId, description, stock } = req.body;
+    const file = req.file;
+    if (categoryId) {
+      const validObjectId =
+        typeof categoryId === "string" && categoryId.length === 24;
+      if (!validObjectId) return next(new AppError("Invalid category id", 400));
+    }
     const product = await db.product.findUnique({
       where: {
         id,
@@ -212,20 +238,37 @@ export const updateProduct = async (
 
     if (!validCategory) return next(new AppError("Invalid category.", 404));
 
-    // TODO: Upload image to firebase
+    let imageUrl = product.image;
+
+    if (file) {
+      const fileExtension = file.originalname.split(".").pop();
+      const fileRef = ref(
+        storage,
+        `images/products/${product.id}.${fileExtension}`
+      );
+
+      await uploadBytes(fileRef, file.buffer);
+
+      imageUrl = await getDownloadURL(fileRef);
+    }
+
+    const updateData: any = {
+      image: imageUrl,
+    };
+
+    if (name) updateData.name = name;
+    if (price) updateData.price = +price;
+    if (categoryId) updateData.categoryId = categoryId;
+    if (description) updateData.description = description;
+    if (stock) updateData.stock = +stock;
+
+    console.log(updateData);
 
     const updatedProduct = await db.product.update({
       where: {
         id,
       },
-      data: {
-        name,
-        price,
-        categoryId,
-        description,
-        stock,
-        image,
-      },
+      data: updateData,
     });
 
     res.status(200).json(new AppSuccess("Product updated", updatedProduct));
