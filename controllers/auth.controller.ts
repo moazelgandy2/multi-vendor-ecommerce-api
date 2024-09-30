@@ -4,10 +4,10 @@ import { db } from "../database/db";
 import { AppSuccess } from "../utils/AppSuccess";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { User } from "@prisma/client";
 import { JWTDecoded } from "../utils/types";
 import { redis } from "../database/redis";
 import { sendMail } from "../utils/send-mail";
+import { deleteTokenFromRedis, storeTokenToRedis } from "../utils/redis-token";
 
 export const signUp = async (
   req: Request,
@@ -52,6 +52,8 @@ export const signUp = async (
       }
     );
 
+    await storeTokenToRedis(token, newUser.id);
+
     res
       .status(201)
       .json(new AppSuccess("You have successfully signed up.", { token }));
@@ -88,6 +90,8 @@ export const signIn = async (
         expiresIn: "1d",
       }
     );
+
+    await storeTokenToRedis(token, user.id);
 
     res.status(200).json(new AppSuccess("Login successful.", { token }));
   } catch (error) {
@@ -203,12 +207,10 @@ export const changePassword = async (
         password: bcrypt.hashSync(newPassword, 10),
       },
     });
-
+    await deleteTokenFromRedis(req.user.id);
     res.status(200).json(
       new AppSuccess("Password changed successfully.", {
-        token: jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
-          expiresIn: "1d",
-        }),
+        message: "Please login with your new password to get a new token.",
       })
     );
   } catch (error) {
@@ -237,6 +239,8 @@ export const resetPassword = async (
     await redis.hset(hashKey, "otp", OTP.toString());
 
     await sendMail(OTP, email);
+
+    await deleteTokenFromRedis(user.id);
 
     res.status(200).json(new AppSuccess("OTP sent to your email.", { email }));
   } catch (error) {
@@ -278,6 +282,8 @@ export const verifyOTP = async (
     });
 
     await redis.del(hashKey);
+
+    await deleteTokenFromRedis(user.id);
 
     res.status(200).json(
       new AppSuccess(

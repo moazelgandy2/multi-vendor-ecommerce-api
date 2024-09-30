@@ -2,8 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/AppError";
 import jwt from "jsonwebtoken";
 import { AuthenticatedRequest } from "../utils/types";
+import { getTokenFromRedis } from "../utils/redis-token";
 
-export default function authMiddleware(
+export default async function authMiddleware(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
@@ -11,9 +12,22 @@ export default function authMiddleware(
   const { token } = req.headers as { token: string };
   if (!token) return next(new AppError("Unauthorized", 401));
 
-  jwt.verify(token, process.env.JWT_SECRET!, (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET!, async (err, decoded) => {
     if (err) return next(new AppError("Unauthorized", 401));
-    return ((req as any).user = decoded);
+
+    if (decoded) {
+      const tokenFromRedis = await getTokenFromRedis((decoded as any).id);
+      if (tokenFromRedis !== token)
+        return next(
+          new AppError(
+            `Unauthorized: Invalid token. Please login to get a new token.`,
+            401
+          )
+        );
+
+      (req as any).user = decoded;
+
+      return next();
+    }
   });
-  next();
 }
