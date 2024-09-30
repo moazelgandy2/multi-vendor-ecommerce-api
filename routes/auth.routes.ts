@@ -37,7 +37,7 @@ authRouter.put(
 );
 
 authRouter.put(
-  "/password/change",
+  "/password/update",
   authMiddleware,
   validateData(ChangePasswordSchema),
   changePassword
