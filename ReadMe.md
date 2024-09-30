@@ -4,14 +4,16 @@ Welcome to the **E-Commerce Backend APIs** project! This is a powerful and flexi
 
 ## 📚 Table of Contents
 
-| Route Type                                    | Route Description                   |
-| --------------------------------------------- | ----------------------------------- |
-| [🌟 Features](#🌟-features)                   | Explore the features of the API.    |
-| [🛠️ Technologies Used](#🛠️-technologies-used) | Discover the technologies utilized. |
-| [📦 Installation](#📦-installation)           | Instructions to set up the project. |
-| [📑 API Documentation](#📑-api-documentation) | Detailed API documentation.         |
+| Route Type                                 | Route Description                   |
+| ------------------------------------------ | ----------------------------------- |
+| [🌟 Features](#features)                   | Explore the features of the API.    |
+| [🛠️ Technologies Used](#technologies-used) | Discover the technologies utilized. |
+| [📦 Installation](#installation)           | Instructions to set up the project. |
+| [📑 API Documentation](#api-documentation) | Detailed API documentation.         |
 
 ## 🌟 Features
+
+<a name="features"></a>
 
 - **RESTful API:** Well-structured and intuitive API endpoints designed for seamless integration into various applications. 🚀
 - **Secure User Authentication:** Robust JWT-based authentication to ensure user security and session management. 🔐
@@ -23,6 +25,8 @@ Welcome to the **E-Commerce Backend APIs** project! This is a powerful and flexi
 - **Efficient Database Management:** Leverage Prisma for smooth and efficient database operations with MongoDB, ensuring data accessibility and reliability. 🗄️
 
 ## 🛠️ Technologies Used
+
+<a name="technologies-used"></a>
 
 - **Node.js:** 🌐 JavaScript runtime environment for building scalable server-side applications.
 - **Express:** ⚙️ Minimalist web framework for creating robust APIs with ease.
@@ -38,6 +42,8 @@ Welcome to the **E-Commerce Backend APIs** project! This is a powerful and flexi
 - **Nodemailer:** ✉️ Module for sending emails easily, enhancing user communication.
 
 ## 📦 Installation
+
+<a name="installation"></a>
 
 To get started with the project, follow these steps:
 
@@ -90,19 +96,23 @@ To get started with the project, follow these steps:
 
 ## 📑 API Documentation
 
-| Route Type                                            | Route Description                               |
-| ----------------------------------------------------- | ----------------------------------------------- |
-| [🔐 Authentication Routes](#🔐-authentication-routes) | View the routes related to user authentication. |
-| [🛒 Products Routes](#🛒-products-routes)             | Explore the routes for managing products.       |
-| [🏷️ Categories Routes](#🏷️-categories-routes)         | Access routes for category management.          |
-| [⭐ Reviews Routes](#⭐-reviews-routes)               | View routes for managing product reviews.       |
-| [🌠 Wishlist Routes](#🌠-wishlist-routes)             | Access routes for user wishlists.               |
-| [🛒 Cart Routes](#🛒-cart-routes)                     | Explore routes for managing shopping carts.     |
-| [🎟️ Coupon Routes](#🎟️-coupon-routes)                 | View routes for managing coupons.               |
-| [🛍️ Order Routes](#🛍️-order-routes)                   | Access routes for order management.             |
-| [💳 Checkout Routes](#💳-checkout-routes)             | Explore routes for the checkout process.        |
+<a name="api-documentation"></a>
+
+| Route Type                                         | Route Description                               |
+| -------------------------------------------------- | ----------------------------------------------- |
+| [🔐 Authentication Routes](#authentication-routes) | View the routes related to user authentication. |
+| [🛒 Products Routes](#products-routes)             | Explore the routes for managing products.       |
+| [🏷️ Categories Routes](#categories-routes)         | Access routes for category management.          |
+| [⭐ Reviews Routes](#reviews-routes)               | View routes for managing product reviews.       |
+| [🌠 Wishlist Routes](#wishlist-routes)             | Access routes for user wishlists.               |
+| [🛒 Cart Routes](#cart-routes)                     | Explore routes for managing shopping carts.     |
+| [🎟️ Coupon Routes](#coupon-routes)                 | View routes for managing coupons.               |
+| [🛍️ Order Routes](#order-routes)                   | Access routes for order management.             |
+| [💳 Checkout Routes](#checkout-routes)             | Explore routes for the checkout process.        |
 
 ## 🔐 Authentication Routes
+
+<a name="authentication-routes"></a>
 
 - **Base route:** `/auth`
 
@@ -300,6 +310,8 @@ To get started with the project, follow these steps:
   - `500 Internal Server Error`: If an error occurs while updating the user's profile.
 
 ## 🛒 Products Routes
+
+<a name="products-routes"></a>
 
 - **Base route:** `/products`
 
@@ -525,6 +537,8 @@ To get started with the project, follow these steps:
 
 ## 🏷️ Categories Routes 🏷️
 
+<a name="categories-routes"></a>
+
 - **Base route:** `/categories`
 
 ### 1. Get All Categories
@@ -694,6 +708,8 @@ To get started with the project, follow these steps:
   - `500 Internal Server Error`: If an error occurs while deleting the category.
 
 ## ⭐ Reviews Routes ⭐
+
+<a name="reviews-routes"></a>
 
 - **Base route:** `/reviews`
 
@@ -888,6 +904,8 @@ To get started with the project, follow these steps:
 
 ## 🌠 Wishlist Routes 🌠
 
+<a name="wishlist-routes"></a>
+
 - **Base route:** `/wishlist`
 
 ### 1. Get User Wishlist
@@ -1033,6 +1051,8 @@ To get started with the project, follow these steps:
   - `500 Internal Server Error`: If an error occurs while clearing the wishlist.
 
 ## 🛒 Cart Routes 🛒
+
+<a name="cart-routes"></a>
 
 - **Base route:** `/cart`
 
@@ -1216,6 +1236,8 @@ To get started with the project, follow these steps:
 
 ## 🎟️ Coupon Routes 🎟️
 
+<a name="coupon-routes"></a>
+
 - **Base route:** `/coupon`
 
 ### 1. Create Coupon
@@ -1314,6 +1336,8 @@ To get started with the project, follow these steps:
   - `500 Internal Server Error`: If an error occurs while applying the coupon.
 
 ## 🛍️ Order Routes 🛍️
+
+<a name="order-routes"></a>
 
 - **Base route:** `/order`
 
@@ -1557,6 +1581,8 @@ To get started with the project, follow these steps:
   - `500 Internal Server Error`: If an error occurs while updating the order.
 
 ## 💳 Checkout Routes 💳
+
+<a name="checkout-routes"></a>
 
 - **Base route:** `/checkout`
 
