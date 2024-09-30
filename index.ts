@@ -19,7 +19,9 @@ import { stripeWebhook } from "./webhooks/checkout";
 dotenv.config();
 
 const app = express();
+
 app.use(cors());
+
 app.use((req, res, next) => {
   if (req.originalUrl === "/webhook") {
     next();
@@ -27,6 +29,7 @@ app.use((req, res, next) => {
     express.json()(req, res, next);
   }
 });
+
 const PORT = process.env.PORT || 3000;
 
 app.use("/auth", authRouter);

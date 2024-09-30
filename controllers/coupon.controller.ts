@@ -90,7 +90,7 @@ export const createCoupon = async (
     });
 
     if (!isAdmin) {
-      return next(new AppError("Unauthorized", 401));
+      return next(new AppError("Unauthorized", 403));
     }
 
     const hasKey = `coupon:${code}`;
@@ -135,7 +135,7 @@ export const deleteCoupon = async (
     });
 
     if (!isAdmin) {
-      return next(new AppError("Unauthorized", 401));
+      return next(new AppError("Unauthorized", 403));
     }
 
     const hasKey = `coupon:${code}`;

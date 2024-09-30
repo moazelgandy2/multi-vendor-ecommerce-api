@@ -1,10 +1,12 @@
+import { NextFunction, Request, Response } from "express";
 import Stripe from "stripe";
-import { stripe } from "../utils/stripe";
-import { db } from "../database/db";
-import { NextFunction, Response } from "express";
+
 import { AppError } from "../utils/AppError";
 import { AppSuccess } from "../utils/AppSuccess";
 import { AuthenticatedRequest } from "../utils/types";
+
+import { stripe } from "../utils/stripe";
+import { db } from "../database/db";
 
 export const createCheckout = async (
   req: AuthenticatedRequest,
@@ -75,4 +77,39 @@ export const createCheckout = async (
   });
 
   res.status(200).json(new AppSuccess("Checkout created", { session }));
+};
+
+export const payCash = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+
+    const order = await db.order.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (!order) return next(new AppError("Order not found", 404));
+
+    if (order.paymentType != "COD")
+      return next(new AppError("Order is not cash on delivery", 400));
+
+    const orderData = await db.order.update({
+      where: {
+        id,
+      },
+      data: {
+        status: "PAID",
+      },
+    });
+
+    res.status(200).json(new AppSuccess("Order paid", { orderData }));
+  } catch (error) {
+    console.log(error);
+    return next(new AppError("Internal server error", 500));
+  }
 };

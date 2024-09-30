@@ -44,41 +44,6 @@ export const createOrder = async (
   }
 };
 
-export const payCashOrder = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-
-    const order = await db.order.findFirst({
-      where: {
-        id,
-      },
-    });
-
-    if (!order) return next(new AppError("Order not found", 404));
-
-    if (order.paymentType != "COD")
-      return next(new AppError("Order is not cash on delivery", 400));
-
-    const orderData = await db.order.update({
-      where: {
-        id,
-      },
-      data: {
-        status: "PAID",
-      },
-    });
-
-    res.status(200).json(new AppSuccess("Order paid", { orderData }));
-  } catch (error) {
-    console.log(error);
-    return next(new AppError("Internal server error", 500));
-  }
-};
-
 export const filterOrders = async (
   req: Request extends { user: JWTDecoded } ? Request : any,
   res: Response,

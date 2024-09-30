@@ -27,10 +27,10 @@ authRouter.post("/signup", validateData(SignUpSchema), signUp);
 
 authRouter.post("/signin", validateData(SignInSchema), signIn);
 
-authRouter.get("/me", authMiddleware, me);
+authRouter.get("/profile", authMiddleware, me);
 
 authRouter.put(
-  "/me",
+  "/profile",
   authMiddleware,
   validateData(UpdateProfileSchema),
   updateProfile
@@ -44,7 +44,7 @@ authRouter.put(
 );
 
 authRouter.post(
-  "/password/forget",
+  "/password/forgot",
   validateData(resetPasswordSchema),
   resetPassword
 );

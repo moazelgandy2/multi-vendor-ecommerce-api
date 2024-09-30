@@ -117,6 +117,7 @@ export const me = async (
         username: true,
         email: true,
         phone: true,
+        Address: true,
       },
     });
 
