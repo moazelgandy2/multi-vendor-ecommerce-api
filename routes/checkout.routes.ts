@@ -8,7 +8,7 @@ const checkOutRouter = Router();
 checkOutRouter.post("/:id", authMiddleware, createCheckout);
 
 checkOutRouter.put(
-  "/cash",
+  "/cash/:id",
   authMiddleware,
   allowedRoles("admin", "seller"),
   payCash

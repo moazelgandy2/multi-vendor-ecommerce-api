@@ -16,7 +16,7 @@ const orderRouter = Router();
 orderRouter.post("/create", authMiddleware, createOrder);
 
 orderRouter.get("/me", authMiddleware, filterOrders);
-orderRouter.get("/me/cancel/:id", authMiddleware, cancelOrder);
+orderRouter.post("/me/cancel/:id", authMiddleware, cancelOrder);
 
 orderRouter.delete(
   "/:id",

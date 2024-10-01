@@ -181,7 +181,7 @@ To get started with the project, follow these steps:
 
 ### 3. Change Password
 
-- **Endpoint**: `POST /password/change`
+- **Endpoint**: `POST /password/update`
 - **Description**: Changes the user's password.
 - **Authorization:** Requires `authMiddleware`
 - **Request Body:**

@@ -11,7 +11,7 @@ export const SignUpSchema = z.object({
       city: z.string().min(3),
       state: z.string().min(3),
       zip: z.string().min(5),
-      isDefault: z.boolean(),
+      isDefault: z.boolean().optional(),
     })
   ),
 });
@@ -32,7 +32,7 @@ export const updateAddressSchema = z.object({
   city: z.string().min(3),
   state: z.string().min(3),
   zip: z.string().min(5),
-  isDefault: z.boolean(),
+  isDefault: z.boolean().optional(),
 });
 
 export const ChangePasswordSchema = z.object({

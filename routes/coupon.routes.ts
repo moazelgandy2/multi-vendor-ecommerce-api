@@ -20,6 +20,7 @@ couponRouter.post(
   createCoupon
 );
 couponRouter.delete("/:code", authMiddleware, deleteCoupon);
+
 couponRouter.post(
   "/apply",
   authMiddleware,

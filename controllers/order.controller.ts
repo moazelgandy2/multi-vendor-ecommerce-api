@@ -126,6 +126,12 @@ export const deleteOrder = async (
 
     if (!order) return next(new AppError("Order not found", 404));
 
+    await db.orderItems.deleteMany({
+      where: {
+        orderId: id,
+      },
+    });
+
     const orderData = await db.order.delete({
       where: {
         id,
@@ -155,9 +161,31 @@ export const cancelOrder = async (
         id,
         userId: user.id,
       },
+      include: {
+        orderItems: true,
+      },
     });
 
     if (!order) return next(new AppError("Order not found", 404));
+
+    for (const item of order.orderItems) {
+      await db.product.update({
+        where: {
+          id: item.productId,
+        },
+        data: {
+          stock: {
+            increment: item.quantity,
+          },
+        },
+      });
+    }
+
+    await db.orderItems.deleteMany({
+      where: {
+        orderId: id,
+      },
+    });
 
     const orderData = await db.order.delete({
       where: {
@@ -167,7 +195,7 @@ export const cancelOrder = async (
 
     res.status(200).json(new AppSuccess("Order cancelled", { orderData }));
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return next(new AppError("Internal server error", 500));
   }
 };

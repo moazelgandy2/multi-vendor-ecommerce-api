@@ -54,8 +54,11 @@ export const addToWishList = async (
 ) => {
   try {
     const userId = req.user.id;
-
     const { id: productId } = req.params;
+
+    if (!productId) {
+      return next(new AppError("Product id is required in the params", 400));
+    }
 
     const existWishList = await db.wishList.findFirst({
       where: {
@@ -81,26 +84,17 @@ export const addToWishList = async (
       },
       include: {
         product: {
-          select: {
-            name: true,
-            price: true,
-            description: true,
-            image: true,
-            category: {
-              select: {
-                name: true,
-              },
-            },
-            seller: {
-              select: {
-                username: true,
-                email: true,
-                phone: true,
-              },
-            },
+          include: {
+            category: true,
+            seller: true,
           },
         },
       },
+    });
+
+    userWishList.forEach((item) => {
+      item.product.seller.password = undefined as any;
+      item.product.seller.role = undefined as any;
     });
 
     res
